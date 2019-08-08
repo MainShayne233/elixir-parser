@@ -5,9 +5,9 @@ lalrpop_mod!(pub calculator1);
 pub mod ast;
 
 #[test]
-fn calculator4() {
-    let expr = calculator1::ExprParser::new()
-        .parse("22 * 44 + 66")
+fn calculator1() {
+    let program = calculator1::ProgramParser::new()
+        .parse(":atom")
         .unwrap();
-    assert_eq!(&format!("{:?}", expr), "((22 * 44) + 66)");
+    assert_eq!(&format!("{:?}", program), ":atom");
 }

@@ -1,33 +1,41 @@
 use std::str::FromStr;
-use crate::ast::{Expr, Opcode};
+use crate::ast::{Term, AtomType};
 
 grammar;
 
-pub Expr: Box<Expr> = {
-    Expr ExprOp Factor => Box::new(Expr::Op(<>)),
-    Factor
-};
-
-ExprOp: Opcode = {
-    "+" => Opcode::Add,
-    "-" => Opcode::Add,
-};
-
-Factor: Box<Expr> = {
-    Factor FactorOp Term => Box::new(Expr::Op(<>)),
-    Term,
-};
-
-FactorOp: Opcode = {
-    "*" => Opcode::Mul,
-    "/" => Opcode::Div,
-};
-
-Term: Box<Expr> = {
-    Num => Box::new(Expr::Number(<>)),
-    "(" <Expr> ")",
+pub Program: Box<Term> = {
+    ":" <Identifier> => Box::from(Term::Atom(<>, AtomType::Colon)),
 }
 
-Num: i32 = {
-    r"[0-9]+" => i32::from_str(<>).unwrap()
-};
+Identifier: String = {
+    r"[a-z]+" => String::from(<>)
+}
+
+// pub Expr: Box<Expr> = {
+//     Expr ExprOp Factor => Box::new(Expr::Op(<>)),
+//     Factor
+// };
+// 
+// ExprOp: Opcode = {
+//     "+" => Opcode::Add,
+//     "-" => Opcode::Add,
+// };
+// 
+// Factor: Box<Expr> = {
+//     Factor FactorOp Term => Box::new(Expr::Op(<>)),
+//     Term,
+// };
+// 
+// FactorOp: Opcode = {
+//     "*" => Opcode::Mul,
+//     "/" => Opcode::Div,
+// };
+// 
+// Term: Box<Expr> = {
+//     Num => Box::new(Expr::Number(<>)),
+//     "(" <Expr> ")",
+// }
+// 
+// Num: i32 = {
+//     r"[0-9]+" => i32::from_str(<>).unwrap()
+// };
