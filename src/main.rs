@@ -1,13 +1,21 @@
 #[macro_use] extern crate lalrpop_util;
 
-lalrpop_mod!(pub calculator1);
+lalrpop_mod!(pub grammar);
 
 pub mod ast;
 
 #[test]
-fn calculator1() {
-    let program = calculator1::ProgramParser::new()
+fn test_atom() {
+    let program = grammar::LiteralParser::new()
         .parse(":atom")
         .unwrap();
-    assert_eq!(&format!("{:?}", program), ":atom");
+    assert_eq!(&format!("{:?}", program), "Atom(\"atom\")");
+}
+
+#[test]
+fn test_string() {
+    let program = grammar::LiteralParser::new()
+        .parse("\"hello, world!\"")
+        .unwrap();
+    assert_eq!(&format!("{:?}", program), "String(\"hello, world!\")");
 }
