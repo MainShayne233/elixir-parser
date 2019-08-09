@@ -1,8 +1,9 @@
 #[derive(Debug)]
 pub enum Primative {
-    Boolean(bool),
+    Boolean(String),
+    Integer(String),
+    Float(String),
     Atom(String),
-    Integer(i32),
     String(String),
 }
 

@@ -5,13 +5,23 @@ grammar;
 
 pub Primative: Primative = {
     RawBoolean => Primative::Boolean(<>),
+    RawInteger => Primative::Integer(<>),
+    RawFloat => Primative::Float(<>),
     RawAtom => Primative::Atom(<>),
     RawString => Primative::String(<>),
 }
 
-RawBoolean: bool = {
-    "true" => true,
-    "false" => false,
+RawBoolean: String = {
+    "true" => String::from("true"),
+    "false" => String::from("false"),
+}
+
+RawInteger: String = {
+    r"-?([0-9](_[0-9])?)+" => <>.to_string()
+}
+
+RawFloat: String = {
+    r"-?([0-9](_[0-9])?)+\.([0-9](_[0-9])?)+" => <>.to_string()
 }
 
 RawAtom: String = {
@@ -33,7 +43,7 @@ LiteralAtom: String = {
 }
 
 RawIdentifier: String = {
-    <r"[A-z][0-9A-z_]*"> => <>.to_string(),
+    r"[A-z][0-9A-z_]*" => <>.to_string(),
 }
 
 RawString: String = {

@@ -9,16 +9,42 @@ fn test_boolean_true() {
     let program = grammar::PrimativeParser::new()
         .parse("true")
         .unwrap();
-    assert_eq!(&format!("{:?}", program), "Boolean(true)");
+    assert_eq!(&format!("{:?}", program), "Boolean(\"true\")");
 }
 
 #[test]
 fn test_boolean_false() {
     let program = grammar::PrimativeParser::new()
-        .parse("true")
+        .parse("false")
         .unwrap();
-    assert_eq!(&format!("{:?}", program), "Boolean(true)");
+    assert_eq!(&format!("{:?}", program), "Boolean(\"false\")");
 }
+
+#[test]
+fn test_integer() {
+    let program = grammar::PrimativeParser::new()
+        .parse("124")
+        .unwrap();
+    assert_eq!(&format!("{:?}", program), "Integer(\"124\")");
+}
+
+#[test]
+fn test_integer_underscore() {
+    let program = grammar::PrimativeParser::new()
+        .parse("123_456")
+        .unwrap();
+    assert_eq!(&format!("{:?}", program), "Integer(\"123_456\")");
+}
+
+#[test]
+fn test_float() {
+    let program = grammar::PrimativeParser::new()
+        .parse("124.123")
+        .unwrap();
+    assert_eq!(&format!("{:?}", program), "Float(\"124.123\")");
+}
+
+
 
 #[test]
 fn test_atom_colon() {
@@ -55,7 +81,7 @@ fn test_atom_literal() {
 #[test]
 fn test_string() {
     let program = grammar::PrimativeParser::new()
-        .parse("\"hello, world!\"")
+        .parse("\"Hello, world!\"")
         .unwrap();
-    assert_eq!(&format!("{:?}", program), "String(\"hello, world!\")");
+    assert_eq!(&format!("{:?}", program), "String(\"Hello, world!\")");
 }
