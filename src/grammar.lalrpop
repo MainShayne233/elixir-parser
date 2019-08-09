@@ -1,0 +1,41 @@
+use std::str::FromStr;
+use crate::ast::{Primative};
+
+grammar;
+
+pub Primative: Primative = {
+    RawBoolean => Primative::Boolean(<>),
+    RawAtom => Primative::Atom(<>),
+    RawString => Primative::String(<>),
+}
+
+RawBoolean: bool = {
+    "true" => true,
+    "false" => false,
+}
+
+RawAtom: String = {
+    StandardAtom,
+    StringAtom,
+    LiteralAtom,
+}
+
+StandardAtom: String = {
+    ":" <RawIdentifier>,
+}
+
+StringAtom: String = {
+    ":" <RawString>,
+}
+
+LiteralAtom: String = {
+    <RawIdentifier>,
+}
+
+RawIdentifier: String = {
+    <r"[A-z][0-9A-z_]*"> => <>.to_string(),
+}
+
+RawString: String = {
+    <x:r#""(([^\\"]|\\.)*)""#> => x[1..(x.len() - 1)].to_string(),
+}

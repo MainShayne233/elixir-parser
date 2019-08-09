@@ -1,5 +1,6 @@
 #[derive(Debug)]
-pub enum Literal {
+pub enum Primative {
+    Boolean(bool),
     Atom(String),
     Integer(i32),
     String(String),
