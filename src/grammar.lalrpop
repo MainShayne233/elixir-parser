@@ -1,27 +1,37 @@
 use std::str::FromStr;
-use crate::ast::{Primative};
+use crate::ast::{Expr, UntypedExpr};
 
 grammar;
 
-pub Primative: Primative = {
-    RawBoolean => Primative::Boolean(<>),
-    RawInteger => Primative::Integer(<>),
-    RawFloat => Primative::Float(<>),
-    RawAtom => Primative::Atom(<>),
-    RawString => Primative::String(<>),
+pub UntypedExpr: UntypedExpr = {
+    Integer,
+    Float,
+    Atom,
+    String
 }
 
-RawBoolean: String = {
-    "true" => String::from("true"),
-    "false" => String::from("false"),
+Integer: UntypedExpr = {
+    r"-?([0-9](_[0-9])?)+" => Expr::Int {
+        value: i64::from_str(&<>.replace("_", "")[..]).unwrap()
+    }
 }
 
-RawInteger: String = {
-    r"-?([0-9](_[0-9])?)+" => <>.to_string()
+Float: UntypedExpr = {
+    r"-?([0-9](_[0-9])?)+\.([0-9](_[0-9])?)+" => Expr::Float {
+        value: f64::from_str(&<>.replace("_", "")[..]).unwrap()
+    }
 }
 
-RawFloat: String = {
-    r"-?([0-9](_[0-9])?)+\.([0-9](_[0-9])?)+" => <>.to_string()
+Atom: UntypedExpr = {
+    RawAtom => Expr::Atom {
+        value: <>
+    }
+}
+
+String: UntypedExpr = {
+    RawString => Expr::String {
+        value: <>
+    }
 }
 
 RawAtom: String = {
