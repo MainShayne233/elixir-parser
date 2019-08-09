@@ -37,7 +37,7 @@ String: UntypedExpr = {
 RawAtom: String = {
     StandardAtom,
     StringAtom,
-    LiteralAtom,
+    RawIdentifier,
 }
 
 StandardAtom: String = {
@@ -46,10 +46,6 @@ StandardAtom: String = {
 
 StringAtom: String = {
     ":" <RawString>,
-}
-
-LiteralAtom: String = {
-    <RawIdentifier>,
 }
 
 RawIdentifier: String = {
