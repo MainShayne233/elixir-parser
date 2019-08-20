@@ -6,4 +6,4 @@ Built using the [lalrpop](https://github.com/lalrpop/lalrpop) parser generator.
 
 ## Current State
 
-Parses ints, floats, atoms, and strings kinda okay :)
+Parses ints, floats, atoms, strings, and lists of those things kinda okay :)

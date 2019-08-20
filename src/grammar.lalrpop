@@ -1,5 +1,5 @@
 use std::str::FromStr;
-use crate::ast::{Expr, UntypedExpr, Meta};
+use crate::ast::{Expr, UntypedExpr, Meta, BinOp};
 
 grammar;
 
@@ -8,11 +8,136 @@ pub UntypedExpr: UntypedExpr = {
     Float,
     Atom,
     String,
+    List,
 }
 
+List: UntypedExpr = {
+    "[" <elems:Comma<OpOrSimpleExpr>> <tail:("|" <OpOrSimpleExpr>)?>"]" <e:@L> => {
+        let tail = tail.unwrap_or_else(|| Expr::ListEnd {
+            meta: Meta { start: e, end: e - 1 }
+        });
+        elems.into_iter().rev().fold(
+            tail,
+            |t, h| Expr::List {
+                typ: (),
+                meta: t.meta().clone(),
+                head: Box::new(h),
+                tail: Box::new(t),
+            }
+        )
+    }
+}
+
+Comma<T>: Vec<T> = {
+    <v:(<T> ",")*> <e:T?> => match e {
+        None => v,
+        Some(e) => {
+            let mut v = v;
+            v.push(e);
+            v
+        }
+    }
+}
+
+OpOrSimpleExpr: UntypedExpr = {
+    <o:Op<OrOp, OpOrSimpleExpr, Op2>> => <>,
+    Op2 => <>,
+}
+
+OrOp: BinOp = {
+    "||" => BinOp::Or,
+}
+
+Op2: UntypedExpr = {
+    <o:Op<AndOp, Op2, Op3>> => <>,
+    Op3 => <>,
+}
+
+AndOp: BinOp = {
+    "&&" => BinOp::And,
+}
+
+Op3: UntypedExpr = {
+    <o:Op<EqOp, Op3, Op4>> => <>,
+    Op4 => <>,
+}
+
+EqOp: BinOp = {
+    "==" => BinOp::Eq,
+    "!=" => BinOp::NotEq,
+}
+
+Op4: UntypedExpr = {
+    <o:Op<CompareOp, Op4, Op5>> => <>,
+    Op5 => <>,
+}
+
+CompareOp: BinOp = {
+    "<" => BinOp::LtInt,
+    "<=" => BinOp::LtEqInt,
+    ">" => BinOp::GtInt,
+    ">=" => BinOp::GtEqInt,
+    "<." => BinOp::LtFloat,
+    "<=." => BinOp::LtEqFloat,
+    ">." => BinOp::GtFloat,
+    ">=." => BinOp::GtEqFloat,
+}
+
+Op5: UntypedExpr = {
+    <o:Op<PipeOp, Op5, Op6>> => <>,
+    Op6 => <>,
+}
+
+PipeOp: BinOp = {
+    "|>" => BinOp::Pipe,
+}
+
+Op6: UntypedExpr = {
+    <o:Op<AddOp, Op6, Op7>> => <>,
+    Op7 => <>,
+}
+
+AddOp: BinOp = {
+    "+" => BinOp::AddInt,
+    "+." => BinOp::AddFloat,
+    "-" => BinOp::SubInt,
+    "-." => BinOp::SubFloat,
+}
+
+Op7: UntypedExpr = {
+    <o:Op<MultOp, Op7, SimpleExpr>> => <>,
+    SimpleExpr => <>,
+}
+
+MultOp: BinOp = {
+    "%" => BinOp::ModuloInt,
+    "*" => BinOp::MultInt,
+    "*." => BinOp::MultFloat,
+    "/" => BinOp::DivInt,
+    "/." => BinOp::DivFloat,
+}
+
+Op<Operator, Current, Next>: UntypedExpr = {
+    <start:@L> <l:(<Current>)> <o:(<Operator>)> <r:Next> <end:@L> => Expr::BinOp {
+        meta: Meta { start, end },
+        typ: (),
+        name: o,
+        left: Box::new(l),
+        right: Box::new(r),
+    },
+}
+
+SimpleExpr: UntypedExpr = {
+    Integer,
+    List,
+    Float,
+    String,
+    Atom,
+}
 
 Integer: UntypedExpr = {
-  <start:@L> <i:r"-?([0-9](_[0-9])?)+"> <end:@L> => Expr::Int {
+    <start:@L> <i:r"-?([0-9](_[0-9])?)+"> <end:@L> => Expr::Int {
+      typ: (),
       value: i64::from_str(&i.replace("_", "")[..]).unwrap(),
       meta: Meta { start, end }
     }
@@ -20,13 +145,15 @@ Integer: UntypedExpr = {
 
 Float: UntypedExpr = {
     <start:@L> <f:r"-?([0-9](_[0-9])?)+\.([0-9](_[0-9])?)+"> <end:@L> => Expr::Float {
+        typ: (),
         value: f64::from_str(&f.replace("_", "")[..]).unwrap(),
         meta: Meta { start, end }
     }
 }
 
 Atom: UntypedExpr = {
-   <start:@L> <a:RawAtom> <end:@L> => Expr::Atom {
+    <start:@L> <a:RawAtom> <end:@L> => Expr::Atom {
+       typ: (),
        value: a,
        meta: Meta { start, end }
     }
@@ -34,6 +161,7 @@ Atom: UntypedExpr = {
 
 String: UntypedExpr = {
     <start:@L> <s:RawString> <end:@L> => Expr::String {
+        typ: (),
         value: s,
         meta: Meta { start, end }
     }
@@ -54,7 +182,7 @@ StringAtom: String = {
 }
 
 RawIdentifier: String = {
-    r"[A-z][0-9A-z_]*" => <>.to_string(),
+    r"[A-Za-z][0-9A-Za-z_]*" => <>.to_string(),
 }
 
 RawString: String = {
