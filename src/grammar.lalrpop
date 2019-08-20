@@ -1,5 +1,5 @@
 use std::str::FromStr;
-use crate::ast::{Expr, UntypedExpr};
+use crate::ast::{Expr, UntypedExpr, Meta};
 
 grammar;
 
@@ -7,30 +7,35 @@ pub UntypedExpr: UntypedExpr = {
     Integer,
     Float,
     Atom,
-    String
+    String,
 }
 
+
 Integer: UntypedExpr = {
-    r"-?([0-9](_[0-9])?)+" => Expr::Int {
-        value: i64::from_str(&<>.replace("_", "")[..]).unwrap()
+  <start:@L> <i:r"-?([0-9](_[0-9])?)+"> <end:@L> => Expr::Int {
+      value: i64::from_str(&i.replace("_", "")[..]).unwrap(),
+      meta: Meta { start, end }
     }
 }
 
 Float: UntypedExpr = {
-    r"-?([0-9](_[0-9])?)+\.([0-9](_[0-9])?)+" => Expr::Float {
-        value: f64::from_str(&<>.replace("_", "")[..]).unwrap()
+    <start:@L> <f:r"-?([0-9](_[0-9])?)+\.([0-9](_[0-9])?)+"> <end:@L> => Expr::Float {
+        value: f64::from_str(&f.replace("_", "")[..]).unwrap(),
+        meta: Meta { start, end }
     }
 }
 
 Atom: UntypedExpr = {
-    RawAtom => Expr::Atom {
-        value: <>
+   <start:@L> <a:RawAtom> <end:@L> => Expr::Atom {
+       value: a,
+       meta: Meta { start, end }
     }
 }
 
 String: UntypedExpr = {
-    RawString => Expr::String {
-        value: <>
+    <start:@L> <s:RawString> <end:@L> => Expr::String {
+        value: s,
+        meta: Meta { start, end }
     }
 }
 

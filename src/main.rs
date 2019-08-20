@@ -1,6 +1,6 @@
 #[macro_use]
 extern crate lalrpop_util;
-use crate::ast::Expr;
+use crate::ast::{Expr, Meta};
 
 lalrpop_mod!(pub grammar);
 
@@ -12,7 +12,8 @@ fn test_boolean_true() {
     assert_eq!(
         program,
         Expr::Atom {
-            value: "true".to_string()
+            value: "true".to_string(),
+            meta: Meta { start: 0, end: 4 }
         }
     );
 }
@@ -23,7 +24,8 @@ fn test_boolean_false() {
     assert_eq!(
         program,
         Expr::Atom {
-            value: "false".to_string()
+            value: "false".to_string(),
+            meta: Meta { start: 0, end: 5 }
         }
     );
 }
@@ -31,19 +33,37 @@ fn test_boolean_false() {
 #[test]
 fn test_integer() {
     let program = grammar::UntypedExprParser::new().parse("124").unwrap();
-    assert_eq!(program, Expr::Int { value: 124 });
+    assert_eq!(
+        program,
+        Expr::Int {
+            value: 124,
+            meta: Meta { start: 0, end: 3 }
+        }
+    );
 }
 
 #[test]
 fn test_integer_underscore() {
     let program = grammar::UntypedExprParser::new().parse("123_456").unwrap();
-    assert_eq!(program, Expr::Int { value: 123456 });
+    assert_eq!(
+        program,
+        Expr::Int {
+            value: 123456,
+            meta: Meta { start: 0, end: 7 }
+        }
+    );
 }
 
 #[test]
 fn test_float() {
     let program = grammar::UntypedExprParser::new().parse("124.123").unwrap();
-    assert_eq!(program, Expr::Float { value: 124.123 });
+    assert_eq!(
+        program,
+        Expr::Float {
+            value: 124.123,
+            meta: Meta { start: 0, end: 7 }
+        }
+    );
 }
 
 #[test]
@@ -52,7 +72,8 @@ fn test_atom_colon() {
     assert_eq!(
         program,
         Expr::Atom {
-            value: "atom".to_string()
+            value: "atom".to_string(),
+            meta: Meta { start: 0, end: 5 }
         }
     );
 }
@@ -63,7 +84,8 @@ fn test_atom_mixed_case_colon() {
     assert_eq!(
         program,
         Expr::Atom {
-            value: "AtOm".to_string()
+            value: "AtOm".to_string(),
+            meta: Meta { start: 0, end: 5 }
         }
     );
 }
@@ -76,7 +98,8 @@ fn test_atom_with_spaces_colon() {
     assert_eq!(
         program,
         Expr::Atom {
-            value: "i am an atom".to_string()
+            value: "i am an atom".to_string(),
+            meta: Meta { start: 0, end: 15 }
         }
     );
 }
@@ -89,7 +112,8 @@ fn test_atom_literal() {
     assert_eq!(
         program,
         Expr::Atom {
-            value: "defmodule".to_string()
+            value: "defmodule".to_string(),
+            meta: Meta { start: 0, end: 9 }
         }
     );
 }
@@ -102,7 +126,8 @@ fn test_string() {
     assert_eq!(
         program,
         Expr::String {
-            value: "Hello, world!".to_string()
+            value: "Hello, world!".to_string(),
+            meta: Meta { start: 0, end: 15 }
         }
     );
 }
