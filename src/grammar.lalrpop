@@ -1,3 +1,5 @@
+// vi: ft=rust
+
 use std::str::FromStr;
 use crate::ast::{Expr, UntypedExpr, Meta, BinOp};
 
